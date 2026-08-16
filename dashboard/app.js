@@ -58,6 +58,8 @@ const AGENT_METADATA = {
   },
 };
 
+const ACTION_WEIGHTS = { read: 1, audit: 2, write: 4, send: 6, admin: 10 };
+
 // --- DOM Initializer ---
 document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
@@ -110,6 +112,21 @@ function setupEventListeners() {
     });
   });
 
+  // Template selector for Register Agent tab
+  document.querySelectorAll('.template-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.getElementById('reg-agent-name').value = pill.dataset.name;
+      document.getElementById('reg-agent-scopes').value = pill.dataset.scopes;
+      document.getElementById('reg-agent-desc').value = pill.dataset.desc;
+      updateScopeRiskPreview(pill.dataset.scopes);
+    });
+  });
+
+  // Live input update for scope risk preview
+  document.getElementById('reg-agent-scopes')?.addEventListener('input', (e) => {
+    updateScopeRiskPreview(e.target.value);
+  });
+
   // Attack studio triggers
   document.getElementById('btn-attack-privilege')?.addEventListener('click', () => {
     runAttack('privilege_escalation', 'db_query_agent');
@@ -144,6 +161,28 @@ function setupEventListeners() {
   document.getElementById('btn-verify-signatures')?.addEventListener('click', verifyAllSignatures);
 }
 
+function updateScopeRiskPreview(scopeStr) {
+  const preview = document.getElementById('preview-blast-score');
+  if (!preview) return;
+
+  const scopes = (scopeStr || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  let totalScore = 0;
+
+  scopes.forEach(s => {
+    const parts = s.split(':');
+    const action = parts[parts.length - 1];
+    totalScore += ACTION_WEIGHTS[action] || 2;
+  });
+
+  let riskTier = 'NONE';
+  if (totalScore > 0 && totalScore <= 2) riskTier = 'LOW RISK';
+  else if (totalScore <= 5) riskTier = 'MEDIUM RISK';
+  else if (totalScore <= 9) riskTier = 'HIGH RISK';
+  else if (totalScore > 9) riskTier = 'CRITICAL RISK';
+
+  preview.textContent = `${totalScore} (${riskTier})`;
+}
+
 // --- API Calls ---
 
 async function loadFleetStatus() {
@@ -168,14 +207,13 @@ function populateTargetDropdown(agents) {
   agents.forEach(a => {
     const opt = document.createElement('option');
     opt.value = a.name;
-    opt.textContent = `${a.name} (Max: ${a.blast_radius_ceiling})`;
+    opt.textContent = `${a.name} (Max Blast: ${a.blast_radius_ceiling})`;
     targetSelect.appendChild(opt);
 
-    // Update metadata if new
     if (!AGENT_METADATA[a.name]) {
       AGENT_METADATA[a.name] = {
         name: a.name,
-        iam: 'Custom IAM Service Account',
+        iam: 'Custom Cloud Run SA',
         scopes: `[${a.scope_ceiling.join(', ')}]`,
         score: `${a.blast_radius_ceiling} (${a.risk_level})`,
         status: 'ONLINE',
@@ -296,6 +334,7 @@ async function evaluateScopeSandbox() {
 
 async function registerNewAgent() {
   const name = document.getElementById('reg-agent-name').value.trim();
+  const desc = document.getElementById('reg-agent-desc').value.trim();
   const scopesRaw = document.getElementById('reg-agent-scopes').value.trim();
   const scopes = scopesRaw.split(',').map(s => s.trim()).filter(Boolean);
 
@@ -304,32 +343,47 @@ async function registerNewAgent() {
     return;
   }
 
+  showSpinners(true);
   try {
     const res = await fetch('/api/register-agent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, scopes: scopes }),
+      body: JSON.stringify({ name: name, scopes: scopes, description: desc }),
     });
     const result = await res.json();
 
-    alert(`🎉 Agent '${name}' successfully registered into Fleet with scope ceiling: ${JSON.stringify(result.scope_ceiling)}`);
+    setConsoleStatus('AGENT REGISTERED', 'tag-success');
+    setConsoleOutput(`// Newly Registered Agent: ${name}\nDeclared Scope Ceilings: ${JSON.stringify(result.scope_ceiling, null, 2)}\nBlast-Radius Ceiling: ${result.blast_radius_ceiling}\nStatus: ONLINE`);
 
     // Dynamically calculate coordinate for new agent on SVG canvas
     const count = Object.keys(NODE_COORDINATES).length;
     NODE_COORDINATES[name] = {
-      x: 260 + Math.cos(count * 1.3) * 170,
-      y: 190 + Math.sin(count * 1.3) * 110,
+      x: 260 + Math.cos(count * 1.25) * 170,
+      y: 190 + Math.sin(count * 1.25) * 110,
       r: 26,
       color: '#ec4899',
       label: name,
     };
 
+    AGENT_METADATA[name] = {
+      name: `${name} (Dynamic Agent)`,
+      iam: 'Custom IAM Service Account',
+      scopes: `[${result.scope_ceiling.join(', ')}]`,
+      score: `${result.blast_radius_ceiling}`,
+      status: 'ONLINE',
+    };
+
     document.getElementById('reg-agent-name').value = '';
     document.getElementById('reg-agent-scopes').value = '';
+    document.getElementById('reg-agent-desc').value = '';
 
     await loadFleetStatus();
+    selectAgent(name);
+    alert(`🎉 Agent '${name}' successfully onboarded into Fleet!`);
   } catch (err) {
     alert('Failed to register agent: ' + err.message);
+  } finally {
+    showSpinners(false);
   }
 }
 

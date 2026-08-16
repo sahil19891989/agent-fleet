@@ -35,7 +35,7 @@
           All Things Agentic Hackathon: Fortified Fleet
         </span>
         <span id="chain-health-badge" class="badge badge-success">
-          <span class="dot dot-green"></span> HMAC Chain: Integral
+          <span class="dot dot-green"></span> HMAC Chain: 100% Integral
         </span>
       </div>
     </header>
@@ -73,8 +73,9 @@
             <button class="tab-btn active" data-tab="tab-workflow">Enterprise Tasks</button>
             <button class="tab-btn" data-tab="tab-autonomous">Autonomous Planner</button>
             <button class="tab-btn" data-tab="tab-attacks">Attack Studio</button>
-            <button class="tab-btn" data-tab="tab-scopes">Policy & Scopes</button>
-            <button class="tab-btn" data-tab="tab-auditor">Compliance Auditor</button>
+            <button class="tab-btn" data-tab="tab-sandbox">Scope Sandbox</button>
+            <button class="tab-btn tab-highlight" data-tab="tab-register">+ Register Agent</button>
+            <button class="tab-btn" data-tab="tab-auditor">Auditor</button>
           </div>
         </div>
 
@@ -163,26 +164,25 @@
             </div>
           </div>
 
-          <!-- Tab 4: Scope & Policy Studio (NEW!) -->
-          <div class="tab-pane" id="tab-scopes">
+          <!-- Tab 4: Scope Firewall Sandbox -->
+          <div class="tab-pane" id="tab-sandbox">
             <p class="tab-description">
-              Manage zero-trust policies, test custom scope delegations in a sandbox, or register new agents into the fleet.
+              Test hypothetical delegations through the Blast-Radius Firewall without making actual network calls.
             </p>
 
-            <!-- Sub-section: Scope Evaluator Sandbox -->
             <div class="scope-sandbox-card">
-              <div class="sandbox-title">🧪 Scope Firewall Sandbox (Test Before Delegating)</div>
+              <div class="sandbox-title">🧪 Scope Policy Evaluation Sandbox</div>
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label for="eval-caller">Caller Agent:</label>
+                  <label for="eval-caller">Caller Agent (Delegator):</label>
                   <select id="eval-caller" class="select-input">
-                    <option value="orchestrator">orchestrator (Root)</option>
+                    <option value="orchestrator">orchestrator (Root Authority)</option>
                     <option value="report_agent">report_agent</option>
                     <option value="db_query_agent">db_query_agent</option>
                   </select>
                 </div>
                 <div class="form-group flex-1">
-                  <label for="eval-target">Target Agent:</label>
+                  <label for="eval-target">Target Agent (Recipient):</label>
                   <select id="eval-target" class="select-input"></select>
                 </div>
               </div>
@@ -191,33 +191,63 @@
                 <div class="input-with-button">
                   <input type="text" id="eval-scopes" class="text-input" value="cloudsql:orders:read, cloudsql:orders:write">
                   <button id="btn-eval-scopes" class="btn btn-secondary">
-                    <span>Evaluate Scope</span>
+                    <span>Evaluate Policy</span>
                   </button>
                 </div>
               </div>
               <div id="eval-result-badge" class="eval-badge hidden"></div>
             </div>
+          </div>
 
-            <!-- Sub-section: Register New Agent -->
-            <div class="scope-sandbox-card">
-              <div class="sandbox-title">➕ Register a New Agent to Fleet</div>
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="reg-agent-name">Agent Name:</label>
-                  <input type="text" id="reg-agent-name" class="text-input" placeholder="e.g. invoice_agent">
-                </div>
-                <div class="form-group flex-2">
-                  <label for="reg-agent-scopes">Declared Scope Ceiling(s):</label>
-                  <input type="text" id="reg-agent-scopes" class="text-input" placeholder="e.g. stripe:invoices:read, stripe:invoices:write">
-                </div>
+          <!-- Tab 5: Dedicated Register New Agent Tab (NEW!) -->
+          <div class="tab-pane" id="tab-register">
+            <div class="register-card">
+              <div class="register-header-group">
+                <h3 class="register-headline">➕ Register a New Agent to Fleet</h3>
+                <p class="tab-description">
+                  Declare the agent's identity, system prompt, and <strong>hard permission ceiling</strong>. 
+                  The firewall will continuously enforce this ceiling at runtime.
+                </p>
               </div>
-              <button id="btn-register-agent" class="btn btn-primary btn-sm">
-                <span>+ Add Agent to Fleet</span>
+
+              <!-- Quick Templates -->
+              <div class="template-selector">
+                <span class="preset-label">Quick Templates:</span>
+                <button class="template-pill" data-name="invoice_agent" data-scopes="stripe:invoices:read, stripe:invoices:write" data-desc="Generates customer billing invoices from sales data">Invoice Agent</button>
+                <button class="template-pill" data-name="customer_support_agent" data-scopes="zendesk:tickets:read, slack:support:send" data-desc="Analyzes customer tickets and drafts escalation responses">Support Agent</button>
+                <button class="template-pill" data-name="fraud_detector_agent" data-scopes="cloudsql:analytics:read, pagerduty:alerts:send" data-desc="Scans transaction anomalies and dispatches fraud alerts">Fraud Detector</button>
+                <button class="template-pill" data-name="code_reviewer_agent" data-scopes="github:repos:read, github:pr:write" data-desc="Performs automated security code reviews on pull requests">Code Reviewer</button>
+              </div>
+
+              <div class="form-group">
+                <label for="reg-agent-name">Agent Identifier (Unique Name):</label>
+                <input type="text" id="reg-agent-name" class="text-input" placeholder="e.g. invoice_agent">
+              </div>
+
+              <div class="form-group">
+                <label for="reg-agent-desc">Agent Role / Description:</label>
+                <input type="text" id="reg-agent-desc" class="text-input" placeholder="e.g. You calculate taxes and format customer billing invoices.">
+              </div>
+
+              <div class="form-group">
+                <label for="reg-agent-scopes">Declared Scope Ceilings (comma separated):</label>
+                <input type="text" id="reg-agent-scopes" class="text-input" placeholder="e.g. stripe:invoices:read, firestore:invoices:write">
+                <span class="form-hint">Format: <code>resource:action</code> (Actions: read, write, send, admin, audit)</span>
+              </div>
+
+              <div class="scope-risk-preview" id="scope-risk-preview">
+                <span>Calculated Maximum Blast-Radius:</span>
+                <span class="badge-score" id="preview-blast-score">0 (NONE)</span>
+              </div>
+
+              <button id="btn-register-agent" class="btn btn-primary">
+                <span>+ Register Agent & Join Topology</span>
+                <span class="spinner hidden"></span>
               </button>
             </div>
           </div>
 
-          <!-- Tab 5: Compliance Auditor -->
+          <!-- Tab 6: Compliance Auditor -->
           <div class="tab-pane" id="tab-auditor">
             <p class="tab-description">
               Invokes the <code>security_auditor_agent</code> to audit HMAC signatures,
@@ -235,7 +265,7 @@
               <span>EXECUTION TELEMETRY & RESULTS</span>
               <span id="console-status" class="status-tag tag-idle">IDLE</span>
             </div>
-            <pre class="console-body" id="console-output">// Awaiting task execution or attack simulation...</pre>
+            <pre class="console-body" id="console-output">// Awaiting task execution, attack simulation, or agent registration...</pre>
           </div>
         </div>
       </section>

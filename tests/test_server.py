@@ -54,6 +54,43 @@ def test_server_provenance_and_verify():
     assert "is_integral" in verify_data
 
 
+def test_server_scope_evaluator_sandbox():
+    client = app.test_client()
+    # Test allowed
+    res_allow = client.post("/api/evaluate-scope", json={
+        "caller_agent": "orchestrator",
+        "target_agent": "db_query_agent",
+        "requested_scopes": ["cloudsql:orders:read"]
+    })
+    assert res_allow.status_code == 200
+    data_allow = json.loads(res_allow.data)
+    assert data_allow["allowed"]
+
+    # Test blocked
+    res_block = client.post("/api/evaluate-scope", json={
+        "caller_agent": "orchestrator",
+        "target_agent": "db_query_agent",
+        "requested_scopes": ["cloudsql:orders:write"]
+    })
+    assert res_block.status_code == 200
+    data_block = json.loads(res_block.data)
+    assert not data_block["allowed"]
+    assert data_block["violation_type"] == "CEILING_EXCEEDED"
+
+
+def test_server_register_dynamic_agent():
+    client = app.test_client()
+    res = client.post("/api/register-agent", json={
+        "name": "invoice_agent",
+        "scopes": ["stripe:invoices:read", "stripe:invoices:write"],
+        "description": "Invoice generator agent"
+    })
+    assert res.status_code == 200
+    data = json.loads(res.data)
+    assert data["name"] == "invoice_agent"
+    assert "stripe:invoices:read" in data["scope_ceiling"]
+
+
 def test_server_dashboard_static():
     client = app.test_client()
     res = client.get("/")

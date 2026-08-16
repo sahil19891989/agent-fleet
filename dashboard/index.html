@@ -66,13 +66,14 @@
 
     <!-- Main Workspace Grid -->
     <main class="main-layout">
-      <!-- Left Column: Operations & Attack Console -->
+      <!-- Left Column: Operations, Attack Console & Scope Studio -->
       <section class="panel control-panel">
         <div class="panel-header">
           <div class="tabs">
             <button class="tab-btn active" data-tab="tab-workflow">Enterprise Tasks</button>
             <button class="tab-btn" data-tab="tab-autonomous">Autonomous Planner</button>
             <button class="tab-btn" data-tab="tab-attacks">Attack Studio</button>
+            <button class="tab-btn" data-tab="tab-scopes">Policy & Scopes</button>
             <button class="tab-btn" data-tab="tab-auditor">Compliance Auditor</button>
           </div>
         </div>
@@ -162,7 +163,61 @@
             </div>
           </div>
 
-          <!-- Tab 4: Compliance Auditor -->
+          <!-- Tab 4: Scope & Policy Studio (NEW!) -->
+          <div class="tab-pane" id="tab-scopes">
+            <p class="tab-description">
+              Manage zero-trust policies, test custom scope delegations in a sandbox, or register new agents into the fleet.
+            </p>
+
+            <!-- Sub-section: Scope Evaluator Sandbox -->
+            <div class="scope-sandbox-card">
+              <div class="sandbox-title">🧪 Scope Firewall Sandbox (Test Before Delegating)</div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="eval-caller">Caller Agent:</label>
+                  <select id="eval-caller" class="select-input">
+                    <option value="orchestrator">orchestrator (Root)</option>
+                    <option value="report_agent">report_agent</option>
+                    <option value="db_query_agent">db_query_agent</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="eval-target">Target Agent:</label>
+                  <select id="eval-target" class="select-input"></select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="eval-scopes">Requested Scope(s) (comma separated):</label>
+                <div class="input-with-button">
+                  <input type="text" id="eval-scopes" class="text-input" value="cloudsql:orders:read, cloudsql:orders:write">
+                  <button id="btn-eval-scopes" class="btn btn-secondary">
+                    <span>Evaluate Scope</span>
+                  </button>
+                </div>
+              </div>
+              <div id="eval-result-badge" class="eval-badge hidden"></div>
+            </div>
+
+            <!-- Sub-section: Register New Agent -->
+            <div class="scope-sandbox-card">
+              <div class="sandbox-title">➕ Register a New Agent to Fleet</div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="reg-agent-name">Agent Name:</label>
+                  <input type="text" id="reg-agent-name" class="text-input" placeholder="e.g. invoice_agent">
+                </div>
+                <div class="form-group flex-2">
+                  <label for="reg-agent-scopes">Declared Scope Ceiling(s):</label>
+                  <input type="text" id="reg-agent-scopes" class="text-input" placeholder="e.g. stripe:invoices:read, stripe:invoices:write">
+                </div>
+              </div>
+              <button id="btn-register-agent" class="btn btn-primary btn-sm">
+                <span>+ Add Agent to Fleet</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 5: Compliance Auditor -->
           <div class="tab-pane" id="tab-auditor">
             <p class="tab-description">
               Invokes the <code>security_auditor_agent</code> to audit HMAC signatures,

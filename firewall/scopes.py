@@ -97,3 +97,10 @@ AGENT_MAX_SCOPES: dict[str, ScopeSet] = {
         "compliance:policies:read",
     ]),
 }
+
+
+def register_agent_scope(agent_name: str, scopes: list[str]) -> ScopeSet:
+    """Dynamically register or update an agent's declared scope ceiling."""
+    scope_set = ScopeSet.from_strings(scopes)
+    AGENT_MAX_SCOPES[agent_name] = scope_set
+    return scope_set

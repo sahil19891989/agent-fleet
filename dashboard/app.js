@@ -127,6 +127,12 @@ function setupEventListeners() {
     runAttack('prompt_injection', 'db_query_agent');
   });
 
+  // Scope Sandbox Evaluator
+  document.getElementById('btn-eval-scopes')?.addEventListener('click', evaluateScopeSandbox);
+
+  // Register New Agent Form
+  document.getElementById('btn-register-agent')?.addEventListener('click', registerNewAgent);
+
   // Auditor trigger
   document.getElementById('btn-run-audit')?.addEventListener('click', () => {
     runTask('/api/run-task', { description: 'Audit fleet health and compliance' });
@@ -146,9 +152,36 @@ async function loadFleetStatus() {
     const data = await res.json();
     state.fleet = data;
     document.getElementById('metric-agent-count').textContent = data.total_agents || 4;
+    
+    populateTargetDropdown(data.agents || []);
+    renderTopology();
   } catch (err) {
     console.error('Error loading fleet status:', err);
   }
+}
+
+function populateTargetDropdown(agents) {
+  const targetSelect = document.getElementById('eval-target');
+  if (!targetSelect) return;
+  targetSelect.innerHTML = '';
+
+  agents.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.name;
+    opt.textContent = `${a.name} (Max: ${a.blast_radius_ceiling})`;
+    targetSelect.appendChild(opt);
+
+    // Update metadata if new
+    if (!AGENT_METADATA[a.name]) {
+      AGENT_METADATA[a.name] = {
+        name: a.name,
+        iam: 'Custom IAM Service Account',
+        scopes: `[${a.scope_ceiling.join(', ')}]`,
+        score: `${a.blast_radius_ceiling} (${a.risk_level})`,
+        status: 'ONLINE',
+      };
+    }
+  });
 }
 
 async function loadProvenanceLog() {
@@ -157,7 +190,6 @@ async function loadProvenanceLog() {
     const data = await res.json();
     state.provenanceRecords = data.records || [];
     
-    // Update Metrics
     const stats = data.stats || {};
     document.getElementById('metric-total-delegations').textContent = stats.total_records || 0;
     document.getElementById('metric-quarantines').textContent = stats.quarantined_count || 0;
@@ -227,6 +259,80 @@ async function runAttack(attackType, targetAgent) {
   }
 }
 
+async function evaluateScopeSandbox() {
+  const caller = document.getElementById('eval-caller').value;
+  const target = document.getElementById('eval-target').value;
+  const scopesRaw = document.getElementById('eval-scopes').value;
+  const scopes = scopesRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+  const resultBadge = document.getElementById('eval-result-badge');
+
+  try {
+    const res = await fetch('/api/evaluate-scope', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        caller_agent: caller,
+        target_agent: target,
+        requested_scopes: scopes,
+      }),
+    });
+    const data = await res.json();
+
+    resultBadge.classList.remove('hidden', 'eval-allowed', 'eval-quarantined');
+    if (data.allowed) {
+      resultBadge.classList.add('eval-allowed');
+      resultBadge.innerHTML = `✅ <strong>APPROVED</strong>: Granted ${JSON.stringify(data.granted_scope)} | Risk Index: ${data.blast_radius_score} (${data.risk_level})<br><small>${data.reason}</small>`;
+      flashFlow('all');
+    } else {
+      resultBadge.classList.add('eval-quarantined');
+      resultBadge.innerHTML = `⛔ <strong>QUARANTINED</strong> (${data.violation_type}):<br><small>${data.reason}</small>`;
+      flashQuarantine(target);
+    }
+  } catch (err) {
+    alert('Scope evaluation error: ' + err.message);
+  }
+}
+
+async function registerNewAgent() {
+  const name = document.getElementById('reg-agent-name').value.trim();
+  const scopesRaw = document.getElementById('reg-agent-scopes').value.trim();
+  const scopes = scopesRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+  if (!name || scopes.length === 0) {
+    alert('Please enter an agent name and at least one scope (e.g. stripe:invoices:read).');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/register-agent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, scopes: scopes }),
+    });
+    const result = await res.json();
+
+    alert(`🎉 Agent '${name}' successfully registered into Fleet with scope ceiling: ${JSON.stringify(result.scope_ceiling)}`);
+
+    // Dynamically calculate coordinate for new agent on SVG canvas
+    const count = Object.keys(NODE_COORDINATES).length;
+    NODE_COORDINATES[name] = {
+      x: 260 + Math.cos(count * 1.3) * 170,
+      y: 190 + Math.sin(count * 1.3) * 110,
+      r: 26,
+      color: '#ec4899',
+      label: name,
+    };
+
+    document.getElementById('reg-agent-name').value = '';
+    document.getElementById('reg-agent-scopes').value = '';
+
+    await loadFleetStatus();
+  } catch (err) {
+    alert('Failed to register agent: ' + err.message);
+  }
+}
+
 async function runTamperSimulation() {
   setConsoleStatus('TAMPERING', 'tag-running');
   setConsoleOutput('// Adversary injected unauthorized mutation into stored provenance log...\n');
@@ -275,7 +381,7 @@ function renderTopology() {
   if (!svg) return;
   svg.innerHTML = '';
 
-  const center = NODE_COORDINATES.orchestrator;
+  const center = NODE_COORDINATES.orchestrator || { x: 260, y: 190, r: 34 };
 
   // Render Links
   Object.keys(NODE_COORDINATES).forEach(key => {
@@ -323,7 +429,7 @@ function renderTopology() {
 function selectAgent(agentKey) {
   const meta = AGENT_METADATA[agentKey] || {
     name: agentKey,
-    iam: 'Default Service Account',
+    iam: 'Custom IAM Service Account',
     scopes: '[]',
     score: '0',
     status: 'ONLINE',

@@ -1,17 +1,16 @@
 """
 Flask HTTP Control Plane Server for the Fortified Enterprise Fleet.
 Serves the real-time web dashboard and exposes REST APIs for task orchestration,
-attack simulations, cryptographic chain verification, and telemetry.
+attack simulations, cryptographic chain verification, and scope policy management.
 """
 
 from __future__ import annotations
 import os
 import sys
 
-# Ensure root directory is on python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from flask import Flask, request, jsonify, send_from_directory, Response
+from flask import Flask, request, jsonify, send_from_directory
 from orchestrator.orchestrator import Orchestrator
 from provenance.chain import get_chain_store
 
@@ -40,9 +39,47 @@ def get_fleet():
     return jsonify(orch.get_fleet_status())
 
 
+@app.route("/api/register-agent", methods=["POST"])
+def register_agent():
+    """Dynamically register a new agent with declared scope ceilings from the UI."""
+    body = request.get_json(silent=True) or {}
+    name = body.get("name", "").strip().lower().replace(" ", "_")
+    scopes = body.get("scopes", [])
+    description = body.get("description", "")
+
+    if not name:
+        return jsonify({"error": "Agent name is required"}), 400
+    if not scopes:
+        return jsonify({"error": "At least one scope is required (e.g. 'stripe:invoices:read')"}), 400
+
+    result = orch.register_new_agent(name, scopes, description)
+    return jsonify(result)
+
+
+@app.route("/api/evaluate-scope", methods=["POST"])
+def evaluate_scope():
+    """Sandbox endpoint: Test what the firewall would decide for any hypothetical delegation."""
+    body = request.get_json(silent=True) or {}
+    caller_agent = body.get("caller_agent", "orchestrator")
+    caller_scopes = body.get("caller_scopes")
+    target_agent = body.get("target_agent", "")
+    requested_scopes = body.get("requested_scopes", [])
+
+    if not target_agent or not requested_scopes:
+        return jsonify({"error": "Target agent and requested scopes are required"}), 400
+
+    decision = orch.evaluate_scope_policy(
+        caller_agent=caller_agent,
+        caller_scopes=caller_scopes,
+        target_agent=target_agent,
+        requested_scopes=requested_scopes,
+    )
+    return jsonify(decision)
+
+
 @app.route("/api/run-task", methods=["POST"])
 def run_task():
-    """Executes a standard 3-step enterprise workflow (Query -> Report -> Notify)."""
+    """Executes a standard enterprise workflow (Query -> Report -> Notify)."""
     body = request.get_json(silent=True) or {}
     description = body.get("description", "Q3 enterprise renewals analysis")
     result = orch.run_task(description)
@@ -75,7 +112,7 @@ def get_provenance():
     stats = chain_store.stats()
     return jsonify({
         "stats": stats,
-        "records": list(reversed(records)),  # Newest first
+        "records": list(reversed(records)),
     })
 
 
@@ -117,5 +154,5 @@ def healthz():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    print(f"🚀 Starting Fortified Agent Fleet Control Plane on port {port}")
+    print(f"Starting Fortified Agent Fleet Control Plane on port {port}")
     app.run(host="0.0.0.0", port=port, debug=False)

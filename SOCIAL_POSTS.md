@@ -16,10 +16,10 @@ Copy and paste either or both of these posts to **LinkedIn** and **X (Twitter)**
 > 🔹 **Scope Attenuation Guarantee**: Permissions can only narrow down a chain, never widen.
 > 🔹 **Blast-Radius Firewall**: Live risk index scoring before any delegated task executes.
 > 🔹 **HMAC-SHA256 Cryptographic Provenance**: Verifiable non-repudiation audit trail in Google Cloud Firestore.
-> 🔹 **Autonomous Gemini 2.5 Planner**: Decomposes high-level goals into least-privilege subtasks.
+> 🔹 **Autonomous Gemini 3.5 Planner**: Decomposes high-level goals into least-privilege subtasks.
 > 🔹 **Multi-Service Cloud Run Isolation**: Dedicated IAM service accounts per worker agent.
 >
-> 📊 Built with Google ADK, Gemini 2.5 Flash, Google Cloud Run, and Firestore.
+> 📊 Built with Google ADK, Gemini 3.5 Flash, Google Cloud Run, and Firestore.
 >
 > 💻 Check out our GitHub repository & live demo: [Link to your GitHub / Devpost]
 >
@@ -35,7 +35,7 @@ Copy and paste either or both of these posts to **LinkedIn** and **X (Twitter)**
 > ✅ Scope Attenuation (permissions can only narrow)
 > ✅ Pre-execution Blast-Radius Firewall
 > ✅ HMAC-SHA256 Cryptographic Provenance
-> ✅ Dynamic Gemini 2.5 Planner
+> ✅ Dynamic Gemini 3.5 Planner
 > ✅ Multi-service Google Cloud Run isolation
 >
 > 💻 Repo & Demo: [Link to your GitHub / Devpost]

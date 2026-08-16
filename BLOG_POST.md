@@ -12,7 +12,7 @@ However, as permissions flow through delegation chains, standard multi-agent sys
 
 When an agent delegates a task, how do we guarantee that a sub-agent only receives the minimum necessary permissions? What prevents a compromised analytics agent from requesting destructive `WRITE` or `ADMIN` access? And if an adversary alters the delegation logs, how can compliance auditors mathematically prove non-repudiation?
 
-To solve this, we built the **Fortified Enterprise Agent Fleet**—a zero-trust governance control plane powered by **Gemini 2.5 Flash**, **Google ADK**, and **Google Cloud Run**.
+To solve this, we built the **Fortified Enterprise Agent Fleet**—a zero-trust governance control plane powered by **Gemini 3.5 Flash**, **Google ADK**, and **Google Cloud Run**.
 
 ---
 
@@ -107,14 +107,14 @@ This provides true network-level and OS-level process isolation, enforcing defen
 
 To make agent governance accessible, we built a real-time visual control plane:
 - **Live SVG Topology Graph**: Visualizes live delegation traffic with animated green flow lines and crimson quarantine flashes.
-- **Autonomous Planner (Gemini 2.5)**: Allows operators to submit open-ended enterprise goals, which Gemini decomposes into least-privilege subtasks.
+- **Autonomous Planner (Gemini 3.5)**: Allows operators to submit open-ended enterprise goals, which Gemini decomposes into least-privilege subtasks.
 - **Attack Simulation Studio**: One-click vulnerability testing for Privilege Escalation, Cross-Hop Scope Widening, Log Tampering, and SQL Injection.
 
 ---
 
 ## Summary & Next Steps
 
-The **Fortified Enterprise Agent Fleet** proves that enterprise multi-agent systems do not have to sacrifice security for autonomy. By combining Gemini 2.5's reasoning capabilities with mathematical scope attenuation and cryptographic audit trails, we can safely govern autonomous agent networks at enterprise scale.
+The **Fortified Enterprise Agent Fleet** proves that enterprise multi-agent systems do not have to sacrifice security for autonomy. By combining Gemini 3.5's reasoning capabilities with mathematical scope attenuation and cryptographic audit trails, we can safely govern autonomous agent networks at enterprise scale.
 
 - **Explore the Code**: [GitHub Repository](https://github.com/sahil19891989/agent-fleet)
 - **Watch the Demo**: [YouTube Demo Walkthrough](https://youtube.com/watch?v=...)

@@ -42,7 +42,7 @@
 **Speaker**:
 > *"Let's execute a standard enterprise workflow: analyzing Q3 renewals. As I click Execute Task, the orchestrator evaluates each step against the Blast-Radius Firewall. You see green traffic flow across DbQueryAgent, ReportAgent, and NotifierAgent, completing the pipeline safely.*
 >
-> *Next, let's test our Autonomous Gemini 2.5 Planner. I can enter an open-ended goal, and Gemini dynamically analyzes the request, selects the required agents, negotiates least-privilege scopes, and navigates the firewall to execute the mission autonomously."*
+> *Next, let's test our Autonomous Gemini 3.5 Planner. I can enter an open-ended goal, and Gemini dynamically analyzes the request, selects the required agents, negotiates least-privilege scopes, and navigates the firewall to execute the mission autonomously."*
 
 ---
 

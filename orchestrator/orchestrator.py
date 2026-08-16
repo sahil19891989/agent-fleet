@@ -12,6 +12,7 @@ from typing import Dict, Any, List, Optional
 
 from firewall.blast_radius import evaluate_delegation, blast_radius_score, QuarantineError, get_risk_level
 from firewall.scopes import ScopeSet, AGENT_MAX_SCOPES, register_agent_scope
+from firewall.gemma_triage import triage_input
 from provenance.chain import new_record, get_chain_store
 from orchestrator.bus import get_bus
 from agents.base import call_gemini, WorkerAgent
@@ -117,9 +118,29 @@ class Orchestrator:
         caller_granted_scope: ScopeSet | None = None,
     ) -> dict:
         """
-        Core delegation interceptor. Evaluates scopes through the firewall,
-        logs an HMAC-signed audit record, and forwards to the bus if permitted.
+        Core delegation interceptor. Runs Gemma content triage, evaluates
+        scopes through the firewall, logs an HMAC-signed audit record, and
+        forwards to the bus if permitted.
         """
+        triage = triage_input(task_input)
+        if triage.flagged:
+            record = new_record(
+                task_id=task_id,
+                parent_agent=caller_agent,
+                child_agent=target_agent,
+                requested_scope=str(requested_scope),
+                granted_scope=str(ScopeSet()),
+                allowed=False,
+                reason=f"Gemma triage flagged input as '{triage.category}': {triage.reason}",
+                blast_radius_score=blast_radius_score(requested_scope),
+                risk_level="CRITICAL",
+            )
+            self.chain.write(record)
+            raise QuarantineError(
+                f"Prompt-Injection Blocked by Gemma Triage ({triage.model}): {triage.reason}",
+                "PROMPT_INJECTION_GEMMA",
+            )
+
         decision = evaluate_delegation(
             caller_agent=caller_agent,
             caller_granted_scope=caller_granted_scope,
@@ -319,14 +340,22 @@ class Orchestrator:
                     "attack_type": "prompt_injection",
                     "status": "MITIGATED_BY_AGENT",
                     "result": result,
-                    "explanation": "DbQueryAgent defense-in-depth sanitization blocked destructive SQL injection.",
+                    "explanation": "Payload passed Gemma triage but was caught by DbQueryAgent's keyword-level defense-in-depth.",
                 }
             except QuarantineError as e:
+                blocked_by = (
+                    "Gemma Triage (pre-firewall)"
+                    if e.violation_type == "PROMPT_INJECTION_GEMMA"
+                    else "Blast-Radius Firewall"
+                )
                 return {
                     "task_id": task_id,
                     "attack_type": "prompt_injection",
                     "status": "QUARANTINED",
+                    "quarantined": True,
+                    "blocked_by": blocked_by,
                     "reason": e.reason,
+                    "explanation": f"{blocked_by} rejected the payload before it reached any worker agent.",
                 }
 
         return {"error": f"Unknown attack type '{attack_type}'"}

@@ -5,7 +5,7 @@ Each agent has a distinct identity, declared scope ceiling, and runtime
 defense-in-depth boundary.
 
 Supports:
-- Gemini 2.5 Flash / 3.5 / Pro via google-generativeai / google-genai
+- Gemini 3.5 Flash / Pro via google-generativeai / google-genai
 - MOCK_MODE: Generates realistic mock responses when GEMINI_API_KEY is not set
 """
 
@@ -15,12 +15,28 @@ import json
 from typing import Optional
 
 
-MOCK_MODE = os.environ.get("GEMINI_API_KEY") is None or os.environ.get("GEMINI_API_KEY") == ""
+# Auto-load .env file if present
+def _load_env():
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, val = line.split("=", 1)
+                    val = val.strip().strip("'").strip('"')
+                    os.environ[key.strip()] = val
+
+_load_env()
+
+def is_mock_mode() -> bool:
+    key = os.environ.get("GEMINI_API_KEY", "").strip()
+    return not key or key == "your-key" or key == ""
 
 
 def call_gemini(system_prompt: str, user_input: str, response_format: str = "text") -> str:
     """Invokes Gemini API or returns a contextual mock response if in mock mode."""
-    if MOCK_MODE:
+    if is_mock_mode():
         return _mock_gemini_response(system_prompt, user_input)
 
     try:
@@ -28,7 +44,7 @@ def call_gemini(system_prompt: str, user_input: str, response_format: str = "tex
 
         api_key = os.environ["GEMINI_API_KEY"]
         genai.configure(api_key=api_key)
-        model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+        model_name = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
         
         model = genai.GenerativeModel(
             model_name=model_name,
@@ -38,7 +54,7 @@ def call_gemini(system_prompt: str, user_input: str, response_format: str = "tex
         return response.text
     except Exception as e:
         # Fallback to intelligent mock with error note if API call fails
-        return f"[Fallback Mode: {str(e)}] Generated response for: {user_input[:80]}..."
+        return f"[Live Gemini Fallback: {str(e)[:60]}] Summary for: {user_input[:80]}..."
 
 
 def _mock_gemini_response(system_prompt: str, user_input: str) -> str:

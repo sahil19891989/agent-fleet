@@ -4,7 +4,8 @@
 Built for the **All Things Agentic Hackathon** — **Track: The Fortified Enterprise Fleet**.
 
 [![Google Cloud Run](https://img.shields.io/badge/Google_Cloud-Cloud_Run-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com/run)
-[![Gemini 2.5 Flash](https://img.shields.io/badge/Model-Gemini_2.5_Flash-8E75B2?logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Gemini 3.5 Flash](https://img.shields.io/badge/Model-Gemini_3.5_Flash-8E75B2?logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
+[![Gemma Triage](https://img.shields.io/badge/Model-Gemma-4285F4?logo=google&logoColor=white)](https://ai.google.dev/gemma)
 [![Google ADK](https://img.shields.io/badge/Framework-Google_ADK-009688?logo=google&logoColor=white)](https://google.github.io/adk-docs/)
 [![HMAC-SHA256 Provenance](https://img.shields.io/badge/Security-HMAC--SHA256_Provenance-10B981)](https://en.wikipedia.org/wiki/HMAC)
 
@@ -29,51 +30,9 @@ The **Fortified Enterprise Agent Fleet** establishes an active zero-trust govern
 
 ## 🏗️ System Architecture
 
-```
-                                +-----------------------------------+
-                                |    Interactive Web Dashboard      |
-                                | (Topology, Attacks, Audit Radar)  |
-                                +-----------------+-----------------+
-                                                  |
-                                            HTTP POST / SSE
-                                                  v
-                     +-------------------------------------------------------------+
-                     |         Orchestrator Control Plane (Cloud Run)              |
-                     |  - Autonomous Gemini 2.5 Planner                            |
-                     |  - Pre-execution Blast-Radius Firewall                      |
-                     +--------------+------------------------------+---------------+
-                                    |                              |
-                          Evaluates & Intercepts              HMAC-SHA256 Sign
-                                    |                              |
-                                    v                              v
-             +------------------------------+          +-----------------------+
-             |    Blast-Radius Firewall     |          | Cryptographic Audit   |
-             | - Scope Ceiling Check        |          | Log (Cloud Firestore) |
-             | - Scope Attenuation Check    |          +-----------------------+
-             | - Blast-Radius Risk Index    |
-             +--------------+---------------+
-                            |
-           [ Approved ]     |      [ Scope Violation ]
-     +----------------------+----------------------+
-     |                                             |
-     v (Pub/Sub or HTTPS)                          v
-+-----------------------------+           +-------------------+
-|     Worker Agent Fleet      |           |    Quarantine     |
-|   (Isolated Cloud Run SAs)  |           |   (Chain Blocked) |
-|                             |           +-------------------+
-|  * db_query_agent           |
-|    (cloudsql:orders:read)   |
-|  * report_agent             |
-|    (firestore:reports:write)|
-|  * notifier_agent           |
-|    (slack / email:send)     |
-|  * security_auditor_agent   |
-|    (provenance:chain:audit) |
-+--------------+--------------+
-               |
-               v
-      Gemini 2.5 Inference
-```
+![Fortified Enterprise Agent Fleet architecture: the orchestrator's Gemini 3.5 planner routes every delegation through the blast-radius firewall, which approves requests to isolated Cloud Run worker agents or quarantines scope violations, and HMAC-signs every attempt into the provenance chain.](docs/architecture.svg)
+
+Every delegation request from the Gemini planner is intercepted by the Blast-Radius Firewall *before* it reaches a worker. Requests within scope route to an isolated, per-agent Cloud Run service; over-scoped requests are quarantined and never execute. Both outcomes — allowed or blocked — are HMAC-SHA256 signed into the append-only provenance chain, which the dashboard polls for its live audit log.
 
 ---
 
@@ -83,7 +42,8 @@ The **Fortified Enterprise Agent Fleet** establishes an active zero-trust govern
 agent-fleet/
 ├── firewall/
 │   ├── scopes.py            # Scope grammar, ScopeSet operations, AGENT_MAX_SCOPES
-│   └── blast_radius.py      # Interception firewall, risk metrics, quarantine logic
+│   ├── blast_radius.py      # Interception firewall, risk metrics, quarantine logic
+│   └── gemma_triage.py      # Gemma pre-firewall prompt-injection content classifier
 ├── provenance/
 │   └── chain.py             # HMAC-SHA256 signed audit trail (Firestore & Local JSONL)
 ├── orchestrator/
@@ -140,14 +100,20 @@ python -m pytest tests/ -v
 
 ---
 
-## 🔑 Run with Real Gemini 2.5 API Calls
+## 🔑 Run with Real Gemini 3.5 & Gemma API Calls
 
-To enable live Gemini calls:
+To enable live model calls (both served through the same `GEMINI_API_KEY`):
 ```bash
 cp .env.example .env
 # Set your GEMINI_API_KEY in .env
 python main.py --web
 ```
+Two distinct Google models are in play: **Gemini 3.5** does the heavy lifting (planning,
+text-to-SQL, report synthesis), while **Gemma** runs as a small, fast pre-firewall
+classifier in `firewall/gemma_triage.py` that screens every delegation's input for
+prompt-injection intent *before* it reaches the blast-radius firewall or any agent.
+With no API key set, both fall back to deterministic offline mocks so the full
+attack-mitigation suite still runs with zero external dependencies.
 
 ---
 
@@ -182,15 +148,17 @@ The built-in **Attack Studio** in the dashboard and test suite proves zero-trust
 | **Privilege Escalation** | Orchestrator/agent requests `cloudsql:orders:write` for a read-only agent. | Evaluates requested scope against declared `AGENT_MAX_SCOPES` ceiling. | ⛔ **Quarantined** before action reaches agent. |
 | **Scope Widening across Hops** | Intermediary worker with `read` scope attempts to delegate `write` scope to a child. | Enforces Scope Attenuation ($\text{Child} \subseteq \text{Caller}$). | ⛔ **Quarantined**; hop blocked. |
 | **Audit Log Tampering** | Adversary alters records directly in storage to disguise rogue actions. | Validates HMAC-SHA256 cryptographic signatures across all records. | 🚨 **Fraud Detected** instantly by auditor. |
-| **Prompt Injection** | Prompt payload includes `DROP TABLE orders; --`. | Defense-in-depth sanitization at the worker execution boundary. | 🛡️ **Blocked** at agent execution layer. |
+| **Prompt Injection** | Payload includes `Ignore previous instructions... DROP TABLE orders; --`. | **Gemma** content-triage classifier (`firewall/gemma_triage.py`) runs before any scope check or agent call. | ⛔ **Quarantined pre-firewall** — never reaches a worker agent. |
+| **Prompt Injection (evasive)** | Destructive keyword with no injection-style phrasing, e.g. `"...update the orders table..."`. | Gemma triage passes it; DbQueryAgent's own keyword-level sanitization catches the raw SQL verb. | 🛡️ **Blocked** at agent execution layer — proves the two layers are independent. |
 
 ---
 
 ## 🏆 Hackathon Alignment & Checklist
 
-- [x] **Gemini 2.5 / 3.5 Models**: Dynamic goal decomposition and multi-agent task planning.
+- [x] **Gemini 3.5 Models**: Dynamic goal decomposition and multi-agent task planning.
 - [x] **Google Agent Frameworks**: Google ADK (`google-adk`) & GenAI SDK architecture.
 - [x] **Google Cloud Services**: Google Cloud Run, Cloud Firestore, Cloud Pub/Sub, Cloud IAM, Vertex AI.
 - [x] **Category Track**: **The Fortified Enterprise Fleet** (Zero-trust multi-agent governance).
 - [x] **Interactive Web Control Plane**: Live SVG topology graph, attack studio, and cryptographic audit log.
-- [x] **Complete Automated Tests**: 100% passing pytest suite.
+- [x] **Complete Automated Tests**: 100% passing pytest suite (20/20).
+- [x] **Bonus — Additional Google Model**: **Gemma** runs as an independent pre-firewall prompt-injection classifier (`firewall/gemma_triage.py`), separate from the Gemini 3.5 planner.

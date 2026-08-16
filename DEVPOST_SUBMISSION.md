@@ -30,14 +30,16 @@ The Fortified Enterprise Fleet acts as an active **Zero-Trust Control Plane** si
 2. **Blast-Radius Firewall**: Before any agent action executes, the firewall computes a live risk index ($\text{Read}=1, \text{Audit}=2, \text{Write}=4, \text{Send}=6, \text{Admin}=10$) and blocks unauthorized scope requests.
 3. **Instant Quarantine**: Over-scoped or malicious delegation attempts are quarantined at the boundary with explanatory diagnostics logged to the audit trail.
 4. **Cryptographic HMAC Provenance**: Every delegation attempt (allowed or blocked) is signed with HMAC-SHA256 and stored in an append-only log (Google Cloud Firestore / local JSONL) for verifiable non-repudiation.
-5. **Autonomous Gemini 2.5 Planner**: Decomposes high-level natural language enterprise goals into multi-agent subtasks with negotiated least-privilege scopes.
-6. **Interactive Visual Dashboard**: A real-time control plane featuring live SVG topology graphs, interactive attack simulators, blast-radius radars, and a cryptographic audit log explorer.
+5. **Autonomous Gemini 3.5 Planner**: Decomposes high-level natural language enterprise goals into multi-agent subtasks with negotiated least-privilege scopes.
+6. **Gemma Pre-Firewall Content Triage**: A second, independent Google model — Gemma — screens every delegation's input for prompt-injection intent before it ever reaches the scope firewall or a worker agent, complementing (not duplicating) each agent's own keyword-level sanitization.
+7. **Interactive Visual Dashboard**: A real-time control plane featuring live SVG topology graphs, interactive attack simulators, blast-radius radars, and a cryptographic audit log explorer.
 
 ---
 
 ## 4. How We Built It
 
-- **Gemini 2.5 Flash / Google ADK**: Powers dynamic task planning, text-to-SQL synthesis, executive reporting, and security evaluation.
+- **Gemini 3.5 Flash / Google ADK**: Powers dynamic task planning, text-to-SQL synthesis, executive reporting, and security evaluation.
+- **Gemma**: A second, smaller Google model reached through the same client, dedicated to pre-firewall prompt-injection triage — kept separate from the Gemini 3.5 planner so a compromised planner prompt can't also disable the content classifier.
 - **Google Cloud Run**: Deploys the Orchestrator and 4 worker agents as independent, containerized microservices.
 - **Google Cloud IAM**: Enforces true network-level and resource-level isolation using dedicated per-agent service accounts (`db-query-agent-sa`, `report-agent-sa`, `notifier-agent-sa`, `security-auditor-sa`).
 - **Google Cloud Firestore & Pub/Sub**: Manages immutable cryptographic audit records and asynchronous event messaging.
@@ -56,7 +58,7 @@ The Fortified Enterprise Fleet acts as an active **Zero-Trust Control Plane** si
 
 ## 6. Accomplishments That We're Proud Of
 
-- Built a production-grade governance firewall with **16/16 passing automated unit and integration tests**.
+- Built a production-grade governance firewall with **20/20 passing automated unit and integration tests**.
 - Implemented an **Attack Studio** demonstrating live mitigation of Privilege Escalation, Cross-Hop Scope Widening, Audit Log Tampering, and Prompt Injection.
 - Created a tamper-evident audit log with instant cryptographic verification.
 - Designed a clean, responsive control plane interface that operates smoothly on both desktop and mobile viewports.

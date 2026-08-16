@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fortified Fleet | Zero-Trust Agent Governance & Blast-Radius Firewall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navigation Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+            <path d="M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+            <path d="M7 17a5 5 0 0 1 10 0"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">FORTIFIED AGENT FLEET</h1>
+          <p class="brand-subtitle">Zero-Trust Scope Firewall & HMAC Provenance Control Plane</p>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <span class="badge badge-tech">
+          <span class="dot pulse-blue"></span> Gemini 2.5 Flash
+        </span>
+        <span class="badge badge-track">
+          All Things Agentic Hackathon: Fortified Fleet
+        </span>
+        <span id="chain-health-badge" class="badge badge-success">
+          <span class="dot dot-green"></span> HMAC Chain: Integral
+        </span>
+      </div>
+    </header>
+
+    <!-- Metrics Strip -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Active Worker Agents</div>
+        <div class="metric-value" id="metric-agent-count">4</div>
+        <div class="metric-meta">Cloud Run IAM Isolated</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total Delegations Audited</div>
+        <div class="metric-value" id="metric-total-delegations">0</div>
+        <div class="metric-meta">HMAC-SHA256 Signed</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Quarantine Interceptions</div>
+        <div class="metric-value text-danger" id="metric-quarantines">0</div>
+        <div class="metric-meta">Scope Widening Blocked</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg Fleet Blast Radius</div>
+        <div class="metric-value text-accent" id="metric-avg-blast">0.0</div>
+        <div class="metric-meta">Risk Index (Max: 10.0)</div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Grid -->
+    <main class="main-layout">
+      <!-- Left Column: Operations & Attack Console -->
+      <section class="panel control-panel">
+        <div class="panel-header">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="tab-workflow">Enterprise Tasks</button>
+            <button class="tab-btn" data-tab="tab-autonomous">Autonomous Planner</button>
+            <button class="tab-btn" data-tab="tab-attacks">Attack Studio</button>
+            <button class="tab-btn" data-tab="tab-auditor">Compliance Auditor</button>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <!-- Tab 1: Standard Enterprise Workflow -->
+          <div class="tab-pane active" id="tab-workflow">
+            <p class="tab-description">
+              Executes a multi-agent pipeline with strict scope attenuation:
+              <code>db_query_agent</code> &rarr; <code>report_agent</code> &rarr; <code>notifier_agent</code>.
+            </p>
+
+            <div class="form-group">
+              <label for="workflow-input">Task Goal / Context:</label>
+              <div class="input-with-button">
+                <input type="text" id="workflow-input" class="text-input" value="Q3 enterprise renewals analysis and retention alert">
+                <button id="btn-run-workflow" class="btn btn-primary">
+                  <span class="btn-text">Execute Task</span>
+                  <span class="spinner hidden"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="preset-pills">
+              <span class="preset-label">Presets:</span>
+              <button class="pill-btn" data-input="Q3 enterprise renewals analysis and retention alert">Renewals Analysis</button>
+              <button class="pill-btn" data-input="Quarterly cloud infrastructure spend audit">Cloud Spend Audit</button>
+              <button class="pill-btn" data-input="High value customer churn risk assessment">Churn Risk Alert</button>
+            </div>
+          </div>
+
+          <!-- Tab 2: Autonomous Planner (Gemini) -->
+          <div class="tab-pane" id="tab-autonomous">
+            <p class="tab-description">
+              Gemini analyzes open-ended goals, dynamically decomposes them into subtasks,
+              requests least-privilege scopes, and navigates the blast-radius firewall.
+            </p>
+
+            <div class="form-group">
+              <label for="autonomous-input">Open-Ended Objective:</label>
+              <div class="input-with-button">
+                <input type="text" id="autonomous-input" class="text-input" placeholder="e.g. Audit customer accounts with billing anomalies and notify executive channel">
+                <button id="btn-run-autonomous" class="btn btn-primary">
+                  <span class="btn-text">Decompose & Run</span>
+                  <span class="spinner hidden"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="preset-pills">
+              <span class="preset-label">Ideas:</span>
+              <button class="pill-btn-auto" data-goal="Investigate top accounts with delinquent renewals and generate executive report">Investigate Delinquent Renewals</button>
+              <button class="pill-btn-auto" data-goal="Scan database orders for high-value transactions and alert finance channel">Scan High-Value Orders</button>
+            </div>
+          </div>
+
+          <!-- Tab 3: Attack Studio -->
+          <div class="tab-pane" id="tab-attacks">
+            <p class="tab-description text-warning">
+              Simulate real-world adversary and prompt-injection vectors to verify zero-trust firewall mitigations.
+            </p>
+
+            <div class="attack-grid">
+              <div class="attack-card">
+                <div class="attack-title">1. Privilege Escalation</div>
+                <div class="attack-desc">Requests <code>cloudsql:orders:write</code> on a read-only agent.</div>
+                <button class="btn btn-danger btn-sm" id="btn-attack-privilege">Launch Attack</button>
+              </div>
+
+              <div class="attack-card">
+                <div class="attack-title">2. Scope Widening Across Hop</div>
+                <div class="attack-desc">Intermediary attempts to grant broader scope than it holds.</div>
+                <button class="btn btn-danger btn-sm" id="btn-attack-widening">Launch Attack</button>
+              </div>
+
+              <div class="attack-card">
+                <div class="attack-title">3. Audit Record Tampering</div>
+                <div class="attack-desc">Corrupts a stored audit record without valid HMAC-SHA256 signature.</div>
+                <button class="btn btn-danger btn-sm" id="btn-attack-tamper">Inject Tamper</button>
+              </div>
+
+              <div class="attack-card">
+                <div class="attack-title">4. SQL Injection Sanitization</div>
+                <div class="attack-desc">Tests worker-level defense-in-depth against <code>DROP TABLE</code>.</div>
+                <button class="btn btn-danger btn-sm" id="btn-attack-injection">Simulate Injection</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 4: Compliance Auditor -->
+          <div class="tab-pane" id="tab-auditor">
+            <p class="tab-description">
+              Invokes the <code>security_auditor_agent</code> to audit HMAC signatures,
+              calculate aggregate fleet exposure, and certify governance compliance.
+            </p>
+            <button id="btn-run-audit" class="btn btn-secondary">
+              <span>Run Automated Fleet Audit</span>
+              <span class="spinner hidden"></span>
+            </button>
+          </div>
+
+          <!-- Execution Console Output -->
+          <div class="console-wrapper">
+            <div class="console-header">
+              <span>EXECUTION TELEMETRY & RESULTS</span>
+              <span id="console-status" class="status-tag tag-idle">IDLE</span>
+            </div>
+            <pre class="console-body" id="console-output">// Awaiting task execution or attack simulation...</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Interactive Fleet Topology Graph -->
+      <section class="panel topology-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">FLEET TOPOLOGY & ZERO-TRUST SCOPES</h2>
+          <button id="btn-refresh-fleet" class="btn btn-ghost btn-sm" title="Refresh Fleet Status">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        <div class="topology-container" id="topology-container">
+          <svg id="topology-svg" width="100%" height="380"></svg>
+        </div>
+
+        <!-- Selected Node Inspector -->
+        <div class="node-inspector" id="node-inspector">
+          <div class="inspector-header">
+            <span class="inspector-title" id="inspector-name">Select an Agent Node</span>
+            <span class="status-pill pill-online" id="inspector-status">ONLINE</span>
+          </div>
+          <div class="inspector-body">
+            <div class="inspector-item">
+              <span class="item-label">IAM Role / Service Account:</span>
+              <span class="item-value" id="inspector-iam">roles/datastore.user</span>
+            </div>
+            <div class="inspector-item">
+              <span class="item-label">Declared Scope Ceiling:</span>
+              <span class="item-value code-text" id="inspector-scopes">[firestore:reports:read, firestore:reports:write]</span>
+            </div>
+            <div class="inspector-item">
+              <span class="item-label">Max Blast Radius Index:</span>
+              <span class="item-value badge-score" id="inspector-score">5</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Section: Cryptographic Provenance Audit Log -->
+    <section class="panel provenance-panel">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <h2 class="panel-title">CRYPTOGRAPHIC PROVENANCE AUDIT TRAIL</h2>
+          <span class="subtitle-text">Immutable append-only log with HMAC-SHA256 non-repudiation</span>
+        </div>
+        <div class="provenance-actions">
+          <button id="btn-verify-signatures" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Verify Signatures
+          </button>
+          <button id="btn-refresh-log" class="btn btn-ghost btn-sm">
+            Reload Log
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" id="provenance-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Time</th>
+              <th>Delegation Hop</th>
+              <th>Requested Scope</th>
+              <th>Granted Scope</th>
+              <th>Blast Score</th>
+              <th>Integrity Signature (HMAC)</th>
+              <th>Firewall Rationale</th>
+            </tr>
+          </thead>
+          <tbody id="provenance-tbody">
+            <tr>
+              <td colspan="8" class="text-center text-muted">Loading audit records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div>Built with <strong>Gemini 2.5 Flash</strong>, <strong>Google ADK</strong>, and <strong>Google Cloud Run</strong></div>
+      <div>Track: <strong>Fortified Enterprise Fleet</strong> | Zero-Trust Multi-Agent Governance</div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

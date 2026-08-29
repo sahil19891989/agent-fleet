@@ -1,6 +1,6 @@
 # Fortifying Multi-Agent Systems: Zero-Trust Scope Attenuation & Cryptographic HMAC Provenance
 
-*Published for the **All Things Agentic Hackathon** (Track: Fortified Enterprise Fleet)*
+*I wrote this post for the purposes of entering Google's **All Things Agentic Hackathon** (Track: Fortified Enterprise Fleet).*
 
 ---
 
@@ -103,12 +103,16 @@ This provides true network-level and OS-level process isolation, enforcing defen
 
 ---
 
-## 5. Real-Time Web Dashboard & Attack Studio
+## 5. Gemma: A Second, Independent Line of Defense
+
+Scope checks answer "is this agent allowed to do this?" — they say nothing about whether the *content* of a request is trying to manipulate an agent into doing something else. So we added a second, independent classifier ahead of the firewall: **Gemma**, a distinct Google model from Gemini, screens every delegation's raw input for prompt-injection intent before the scope firewall or any agent ever sees it. Because it's a separate model from the Gemini planner, a compromised planner prompt can't also disable the classifier watching it.
+
+## 6. Real-Time Web Dashboard & Attack Studio
 
 To make agent governance accessible, we built a real-time visual control plane:
 - **Live SVG Topology Graph**: Visualizes live delegation traffic with animated green flow lines and crimson quarantine flashes.
 - **Autonomous Planner (Gemini 3.5)**: Allows operators to submit open-ended enterprise goals, which Gemini decomposes into least-privilege subtasks.
-- **Attack Simulation Studio**: One-click vulnerability testing for Privilege Escalation, Cross-Hop Scope Widening, Log Tampering, and SQL Injection.
+- **Attack Simulation Studio**: One-click vulnerability testing for Privilege Escalation, Cross-Hop Scope Widening, Log Tampering, and Prompt Injection (caught by Gemma before it ever reaches an agent).
 
 ---
 
@@ -116,6 +120,7 @@ To make agent governance accessible, we built a real-time visual control plane:
 
 The **Fortified Enterprise Agent Fleet** proves that enterprise multi-agent systems do not have to sacrifice security for autonomy. By combining Gemini 3.5's reasoning capabilities with mathematical scope attenuation and cryptographic audit trails, we can safely govern autonomous agent networks at enterprise scale.
 
+- **Try it live**: [orchestrator-719825143579.us-central1.run.app](https://orchestrator-719825143579.us-central1.run.app)
 - **Explore the Code**: [GitHub Repository](https://github.com/sahil19891989/agent-fleet)
-- **Watch the Demo**: [YouTube Demo Walkthrough](https://youtube.com/watch?v=...)
+- **Watch the Demo**: *(add your YouTube/Vimeo link here once uploaded)*
 - **Built for**: Google's *All Things Agentic Hackathon* (#AllThingsAgenticHackathon)

@@ -17,11 +17,13 @@ Copy and paste either or both of these posts to **LinkedIn** and **X (Twitter)**
 > 🔹 **Blast-Radius Firewall**: Live risk index scoring before any delegated task executes.
 > 🔹 **HMAC-SHA256 Cryptographic Provenance**: Verifiable non-repudiation audit trail in Google Cloud Firestore.
 > 🔹 **Autonomous Gemini 3.5 Planner**: Decomposes high-level goals into least-privilege subtasks.
+> 🔹 **Gemma Pre-Firewall Triage**: A second, independent Google model screens every request for prompt-injection intent before the firewall or any agent sees it.
 > 🔹 **Multi-Service Cloud Run Isolation**: Dedicated IAM service accounts per worker agent.
 >
-> 📊 Built with Google ADK, Gemini 3.5 Flash, Google Cloud Run, and Firestore.
+> 📊 Built with Google ADK, Gemini 3.5 Flash, Gemma, Google Cloud Run, and Firestore.
 >
-> 💻 Check out our GitHub repository & live demo: [Link to your GitHub / Devpost]
+> 💻 Live demo: https://orchestrator-719825143579.us-central1.run.app
+> 🔗 GitHub: https://github.com/sahil19891989/agent-fleet
 >
 > #AllThingsAgenticHackathon #GoogleCloud #Gemini #MultiAgent #AI #Cybersecurity #ZeroTrust #CloudRun
 
@@ -34,10 +36,12 @@ Copy and paste either or both of these posts to **LinkedIn** and **X (Twitter)**
 > A zero-trust governance control plane for multi-agent systems:
 > ✅ Scope Attenuation (permissions can only narrow)
 > ✅ Pre-execution Blast-Radius Firewall
+> ✅ Gemma catches prompt injection before the firewall even runs
 > ✅ HMAC-SHA256 Cryptographic Provenance
 > ✅ Dynamic Gemini 3.5 Planner
 > ✅ Multi-service Google Cloud Run isolation
 >
-> 💻 Repo & Demo: [Link to your GitHub / Devpost]
+> 💻 Live: orchestrator-719825143579.us-central1.run.app
+> 🔗 Repo: github.com/sahil19891989/agent-fleet
 >
 > #AllThingsAgenticHackathon #Gemini #GoogleCloud #AI

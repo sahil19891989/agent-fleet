@@ -6,7 +6,28 @@
 - **Track**: **The Fortified Enterprise Fleet** ("An enterprise-grade, zero-trust network of agents that can be discovered, governed, and scaled safely inside a large organization")
 - **Tagline**: A zero-trust scope attenuation firewall, dynamic blast-radius evaluator, and cryptographic HMAC provenance control plane for autonomous multi-agent systems.
 - **Repository URL**: `https://github.com/sahil19891989/agent-fleet`
-- **Hosted Demo URL**: `https://orchestrator-[project-hash]-uc.a.run.app` (or local `http://localhost:8080`)
+- **Hosted Demo URL**: `https://orchestrator-719825143579.us-central1.run.app` (public, no login required — no testing credentials needed)
+- **Google SDK(s) used**: `google-adk` (Google Agent Development Kit), `google-generativeai` (Gemini API SDK, used for both Gemini 3.5 and Gemma), `google-cloud-firestore`, `google-cloud-pubsub`, `google-auth`
+- **Project start date**: 2026-08-16 (first commit; see repository history)
+
+---
+
+## 0. Third-Party / Open-Source Code Disclosure
+
+This project is built from scratch for this hackathon. It depends on the
+following open-source libraries (see `requirements.txt` for exact version
+pins), none of which were modified — used as-is via `pip install`:
+
+- `google-adk`, `google-generativeai` — Google Agent Development Kit / Gemini & Gemma API client
+- `google-cloud-firestore`, `google-cloud-pubsub`, `google-auth` — Google Cloud client libraries
+- `flask` — HTTP server for the orchestrator and worker services
+- `requests` — HTTP client used by the orchestrator to call worker Cloud Run services
+- `pytest` — test runner
+
+No proprietary, licensed, or pre-existing private codebase was reused. All
+application logic (the scope firewall, blast-radius scoring, HMAC provenance
+chain, Gemma triage layer, dashboard, and all agent implementations) was
+written for this submission.
 
 ---
 

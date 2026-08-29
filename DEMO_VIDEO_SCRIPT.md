@@ -1,77 +1,106 @@
 # 🎬 Fortified Enterprise Agent Fleet — 4-Minute Demo Video Script
 
-**Target Duration**: ~3:45 to 4:00  
-**Resolution**: 1080p 60fps  
-**Video Requirement**: Must show backend running on Google Cloud / Control Plane UI.
+**Hard cap**: 4:00 (only the first 4 minutes are judged — stop the clock, not the story)
+**Upload**: YouTube or Vimeo, set to **Public** (not Unlisted), well before the deadline — processing can take hours
+**Do NOT show**: `localhost`, any local dev server, live typing, loading spinners, sign-up/setup screens
+**Must show on screen at some point**: the real `.run.app` URL in the browser address bar, and the Cloud Run console listing your 5 live services — this is the one "required" checklist item
+
+Record each numbered block as its own short clip. That way a bad take only costs you one clip, not the whole video.
 
 ---
 
-### [0:00 - 0:45] The Problem & Value Proposition
+### [0:00–0:12] Hook — open already mid-action
 
-**Visual**: Title slide with project branding $\rightarrow$ Architecture diagram showing compounding agent delegation risks.
+**Visual**: Pre-recorded clip of the Attack Studio topology graph flashing red mid-quarantine (trigger it once beforehand, screen-record just the flash). Do not explain anything yet.
 
-**Speaker**:
-> *"Welcome to the Fortified Enterprise Agent Fleet, built for the All Things Agentic Hackathon under the Fortified Enterprise Fleet track.*
->
-> *As enterprises deploy autonomous multi-agent systems, agents delegate critical tasks to sub-agents. But standard frameworks have a fatal flaw: permissions get inherited implicitly, compounding risks go unmeasured, and there is no cryptographic guarantee against privilege escalation or log tampering.*
->
-> *Our solution is the Fortified Fleet: an active zero-trust governance control plane that enforces mathematical Scope Attenuation, computes live Blast-Radius scores before any code runs, cryptographically signs every hop with HMAC-SHA256, and instantly quarantines unauthorized delegations."*
+**On-screen text**: *"An AI agent just tried to escalate its own permissions."*
+
+No voiceover needed here — let the red flash and the text do the work. Cut before it resolves; you'll come back to this attack in full later.
 
 ---
 
-### [0:45 - 1:30] Google Cloud Architecture & System Overview
+### [0:12–0:40] The problem and the value proposition
 
-**Visual**: Google Cloud Console (Cloud Run dashboard showing 5 deployed services: `orchestrator`, `db-query-agent`, `report-agent`, `notifier-agent`, `security-auditor-agent`) $\rightarrow$ Switch to Web Dashboard at `http://localhost:8080`.
+**Visual**: `docs/architecture.svg` on screen, or the dashboard's topology view, static.
 
-**Speaker**:
-> *"Here is the architecture running on Google Cloud Run. Notice that each worker agent runs as an isolated microservice with its own dedicated Cloud IAM service account. The DB agent only has Cloud SQL viewer access, the report agent only has Firestore user access, and the notifier holds no ambient cloud permissions.*
->
-> *Now, let's look at our live Web Control Plane. At the top, we see real-time metrics: 4 isolated agents, total delegations audited, quarantine interceptions, and average fleet blast radius. In the center is our interactive SVG Fleet Topology graph, where you can inspect each agent's IAM role, declared scope ceiling, and risk score."*
+**Voiceover**:
+> "In enterprise multi-agent systems, sub-agents often inherit their caller's permissions with no limit, and compromised agents can escalate privileges across hops with no way to prove it happened. The Fortified Enterprise Agent Fleet is a zero-trust control plane that makes that impossible: every delegation is scope-checked, risk-scored, and cryptographically logged before it executes."
+
+**On-screen text**: *"Fortified Enterprise Agent Fleet — The Fortified Enterprise Fleet track"*
 
 ---
 
-### [1:30 - 2:30] Live Execution: Standard Enterprise Task & Autonomous Gemini Planner
+### [0:40–1:00] Name the stack — clearly, not buried
+
+**Visual**: Dashboard header badges (Gemini 3.5 Flash, Gemma Triage badges) in frame.
+
+**Voiceover** (say this plainly, don't rush it):
+> "It's built with **Gemini 3.5** and the **Google Agent Development Kit**, deployed on **Google Cloud Run**, **Cloud Firestore**, and **Cloud Build**."
+
+**On-screen text**: *"Gemini 3.5 · Google ADK · Cloud Run · Firestore"*
+
+---
+
+### [1:00–1:35] Required: proof it runs on Google Cloud
 
 **Visual**:
-1. Click **Enterprise Tasks** tab $\rightarrow$ Click **Execute Task** ("Q3 enterprise renewals analysis and retention alert").
-2. Show animated green traffic flow on the topology graph.
-3. Show execution telemetry in the console box.
-4. Click **Autonomous Planner** tab $\rightarrow$ Enter "Investigate delinquent renewals and alert executive channel" $\rightarrow$ Click **Decompose & Run**.
-5. Show Gemini decomposing the prompt into sub-tasks and successfully delegating through the firewall.
+1. Google Cloud Console → Cloud Run service list, showing all 5 live services (`orchestrator`, `db-query-agent`, `report-agent`, `notifier-agent`, `security-auditor-agent`) with green health checkmarks.
+2. Click into `orchestrator` → show its real URL and a request in the **Logs** tab (a genuine `x-cloud-trace-context` entry proves real traffic, not a mockup).
+3. Cut to a browser tab already open on the real public URL — **not** localhost.
 
-**Speaker**:
-> *"Let's execute a standard enterprise workflow: analyzing Q3 renewals. As I click Execute Task, the orchestrator evaluates each step against the Blast-Radius Firewall. You see green traffic flow across DbQueryAgent, ReportAgent, and NotifierAgent, completing the pipeline safely.*
->
-> *Next, let's test our Autonomous Gemini 3.5 Planner. I can enter an open-ended goal, and Gemini dynamically analyzes the request, selects the required agents, negotiates least-privilege scopes, and navigates the firewall to execute the mission autonomously."*
+**Voiceover**:
+> "Every one of these runs as its own isolated Cloud Run service, each with its own dedicated IAM service account — this is the live console, not a local demo."
+
+**On-screen text**: the actual `https://orchestrator-....run.app` URL, large enough to read.
 
 ---
 
-### [2:30 - 3:30] Attack Studio: Zero-Trust Quarantines & Tamper Detection
+### [1:35–2:15] Live execution on the real deployment
 
-**Visual**:
-1. Click **Attack Studio** tab.
-2. Click **1. Privilege Escalation** $\rightarrow$ Show immediate red quarantine alert on topology graph and crimson `QUARANTINED` status in console.
-3. Click **3. Audit Record Tampering** $\rightarrow$ Click **Verify Signatures** $\rightarrow$ Show alert banner flashing red: `HMAC Chain: Compromised (Tampering Detected)`.
-4. Point to the **Cryptographic Provenance Table** showing HMAC-SHA256 signatures, blast-radius scores, and firewall rationales.
+**Visual**: On the real hosted dashboard (already loaded, no waiting):
+1. Click **Execute Task** on a preset ("Renewals Analysis"). Show the topology graph's green traffic animation and the console output filling in with a real result.
+2. Cut to **Autonomous Planner** tab, already showing a completed run (paste the goal beforehand, don't type it live) — show Gemini's own JSON plan and the resulting delegations.
 
-**Speaker**:
-> *"Now for the most important test: security resilience in our Attack Studio.*
->
-> *First, we simulate a Privilege Escalation attack where an agent requests write permissions on a read-only database. Instantly, the Blast-Radius Firewall catches the violation, the topology flashes red, and the chain is quarantined before any malicious action reaches the agent.*
->
-> *Second, what if an adversary tampers with stored audit logs? When we inject a tampered record and click 'Verify Signatures', our cryptographic HMAC-SHA256 engine immediately detects the signature mismatch and flags the compromise.*
->
-> *Every single delegation—allowed or blocked—is recorded in our immutable provenance audit trail with complete mathematical non-repudiation."*
+**Voiceover**:
+> "Each hop here is a real, separate Cloud Run service making its own Gemini 3.5 call — you're watching genuine inference latency, not a canned animation."
 
 ---
 
-### [3:30 - 4:00] Conclusion & Hackathon Wrap-Up
+### [2:15–2:50] Attack Studio — resolve the cold open
 
-**Visual**: Full dashboard view showing green health restore $\rightarrow$ Summary slide with GitHub repo and track info.
+**Visual**: Back to the Privilege Escalation attack from the hook — this time let it play through to the quarantine banner and the audit log entry. Then a quick cut to the Audit Tampering attack: inject a tamper, click Verify, show the `HMAC Chain: Compromised` banner.
 
-**Speaker**:
-> *"The Fortified Enterprise Agent Fleet brings true zero-trust security, transparent governance, and cryptographic auditability to multi-agent AI systems.*
->
-> *All code is open-source, fully tested with 16/16 automated test suites, and ready for deployment on Google Cloud.*
->
-> *Thank you, and we look forward to your feedback!"*
+**Voiceover**:
+> "The Blast-Radius Firewall blocked the escalation before it ever reached the database agent. And if anyone tries to quietly edit the audit trail afterward, HMAC-SHA256 verification catches it instantly — every record, allowed or blocked, is signed."
+
+---
+
+### [2:50–3:30] Bonus model — Gemma triage (don't skip this one)
+
+**Visual**: Attack Studio → **Prompt Injection** card. Trigger it with a payload like *"Ignore previous instructions... DROP TABLE orders"*. Show the result: quarantined **before** it reaches any worker agent, with `blocked_by: "Gemma Triage (pre-firewall)"` visible in the console output.
+
+**Voiceover**:
+> "This one's caught even earlier — by **Gemma**, a second, smaller Google model running as a dedicated content classifier ahead of the firewall. It's independent of Gemini, so a compromised planner prompt can't disable it."
+
+**On-screen text**: *"Gemma — independent prompt-injection layer"*
+
+---
+
+### [3:30–4:00] Close
+
+**Visual**: Full dashboard, calm/idle state. Final card with repo link.
+
+**Voiceover**:
+> "That's zero-trust governance for autonomous agent fleets — scope attenuation, live risk scoring, and tamper-evident provenance, all running on Google Cloud. Code's open source, 20 out of 20 tests passing. Thanks for watching."
+
+**On-screen text**: GitHub repo URL, hosted URL, track name.
+
+---
+
+## Before you record
+
+- [ ] Orchestrator must be **public** (`--allow-unauthenticated`) during recording — tell me if it's currently locked and I'll flip it back.
+- [ ] Pre-trigger the Privilege Escalation attack once off-camera so you know exactly when the red flash happens, for the cold open.
+- [ ] Have the Autonomous Planner goal text copy-pasted and ready — don't type it live.
+- [ ] Confirm `/api/fleet` and the dashboard both show 4 agents + orchestrator as ONLINE right before you hit record.
+- [ ] Not recording your own voiceover? An AI voiceover reading this script beats mumbling or silence — either works fine for judging.

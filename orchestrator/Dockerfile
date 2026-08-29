@@ -7,8 +7,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV PORT=8080
-ENV BUS_BACKEND=pubsub
+ENV BUS_BACKEND=cloudrun
 ENV CHAIN_BACKEND=firestore
 EXPOSE 8080
 
-CMD ["python", "orchestrator/server.py"]
+# Run as a module (not a script path) so /app stays on sys.path and
+# `from orchestrator.orchestrator import ...` resolves correctly.
+CMD ["python", "-m", "orchestrator.server"]

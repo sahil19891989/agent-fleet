@@ -3,6 +3,8 @@
 
 Built for the **All Things Agentic Hackathon** — **Track: The Fortified Enterprise Fleet**.
 
+🔗 **Live demo**: [orchestrator-719825143579.us-central1.run.app](https://orchestrator-719825143579.us-central1.run.app) — public, no login required.
+
 [![Google Cloud Run](https://img.shields.io/badge/Google_Cloud-Cloud_Run-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com/run)
 [![Gemini 3.5 Flash](https://img.shields.io/badge/Model-Gemini_3.5_Flash-8E75B2?logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
 [![Gemma Triage](https://img.shields.io/badge/Model-Gemma-4285F4?logo=google&logoColor=white)](https://ai.google.dev/gemma)

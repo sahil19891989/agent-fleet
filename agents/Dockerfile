@@ -11,4 +11,6 @@ EXPOSE 8080
 
 # WORKER_AGENT_MODULE and WORKER_AGENT_CLASS are set per-service at deploy
 # time (see deploy.sh), so this single Dockerfile builds all three workers.
-CMD ["python", "agents/server.py"]
+# Run as a module (not a script path) so /app stays on sys.path and
+# `import agents.<worker>.agent` resolves correctly.
+CMD ["python", "-m", "agents.server"]

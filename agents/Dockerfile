@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV PORT=8080
+ENV PYTHONUNBUFFERED=1
 EXPOSE 8080
 
 # WORKER_AGENT_MODULE and WORKER_AGENT_CLASS are set per-service at deploy

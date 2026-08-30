@@ -91,18 +91,20 @@ def triage_input(text: str) -> TriageResult:
         import google.generativeai as genai
 
         genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-        model_name = os.environ.get("GEMMA_MODEL", "gemma-3-27b-it")
+        model_name = os.environ.get("GEMMA_MODEL", "gemma-4-26b-a4b-it")
 
         model = genai.GenerativeModel(
             model_name=model_name,
             system_instruction=GEMMA_SYSTEM_PROMPT,
         )
         raw = model.generate_content(text).text.strip()
-        if raw.startswith("```"):
-            raw = raw.strip("`")
-            if raw.lower().startswith("json"):
-                raw = raw[4:]
-        parsed = json.loads(raw.strip())
+        # Gemma, unlike Gemini, often prepends its own reasoning before the
+        # answer even when told to respond with only JSON -- pull out the
+        # JSON object rather than assuming the whole response is clean JSON.
+        match = re.search(r"\{[^{}]*\}", raw, re.DOTALL)
+        if not match:
+            raise ValueError(f"No JSON object in Gemma response: {raw[:200]!r}")
+        parsed = json.loads(match.group(0))
 
         return TriageResult(
             flagged=bool(parsed.get("flagged", False)),
@@ -110,8 +112,10 @@ def triage_input(text: str) -> TriageResult:
             reason=str(parsed.get("reason", "")),
             model=model_name,
         )
-    except Exception:
+    except Exception as e:
         # The firewall's structural scope checks must never depend on a
         # live model call succeeding -- fall back to the deterministic
-        # heuristic instead of skipping triage entirely.
+        # heuristic instead of skipping triage entirely. Logged (not
+        # swallowed silently) so a real failure here is still visible.
+        print(f"[gemma_triage] live call failed, using heuristic fallback: {e}", flush=True)
         return _mock_triage(text)

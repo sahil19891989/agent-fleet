@@ -221,6 +221,20 @@ class FirestoreChainStore(BaseChainStore):
         )
         return [d.to_dict() for d in docs]
 
+    def simulate_tamper(self, record_id: str) -> bool:
+        """Helper for demoing cryptographic tamper detection: mutates a
+        record's content directly in Firestore without re-signing it, the
+        same way a compromised storage layer would."""
+        doc_ref = self._db.collection(self._collection).document(record_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return False
+        doc_ref.update({
+            "allowed": not doc.to_dict().get("allowed", False),
+            "reason": "[TAMPERED VIA ADVERSARY] Unauthorized modification.",
+        })
+        return True
+
 
 def get_chain_store() -> BaseChainStore:
     backend = os.environ.get("CHAIN_BACKEND", "local")
